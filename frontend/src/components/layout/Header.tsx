@@ -9,7 +9,7 @@ interface HeaderProps {
 }
 
 export default function Header({ theme, onToggleTheme }: HeaderProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [rates, setRates] = useState<CurrencyRate[]>([]);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function Header({ theme, onToggleTheme }: HeaderProps) {
 
   return (
     <header className="header">
-      <h1 className="header__title">Стіл замовлень</h1>
+      <h1 className="header__title">{t('order_desk')}</h1>
       <div className="header__right">
         {/* Currency Widget */}
         <div className="currency-widget">

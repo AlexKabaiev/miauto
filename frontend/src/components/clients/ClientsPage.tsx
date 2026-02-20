@@ -57,7 +57,7 @@ export default function ClientsPage() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
           <span className="text-muted">{total.toLocaleString()} {t('clients').toLowerCase()}</span>
-          <button className="btn btn--primary" onClick={() => { setEditId(null); setFormOpen(true); }}>+ Новий клієнт</button>
+          <button className="btn btn--primary" onClick={() => { setEditId(null); setFormOpen(true); }}>+ {t('new_client')}</button>
         </div>
       </div>
 
@@ -75,8 +75,8 @@ export default function ClientsPage() {
                   <th style={{ width: 60 }}>ID</th>
                   <th>{t('client')}</th>
                   <th>{t('phone')}</th>
-                  <th>Фірма</th>
-                  <th className="num">Знижка %</th>
+                  <th>{t('firm')}</th>
+                  <th className="num">{t('discount')}</th>
                   <th>{t('status')}</th>
                 </tr>
               </thead>
@@ -92,9 +92,9 @@ export default function ClientsPage() {
                       {c.is_bad ? (
                         <span className="badge badge--danger">⛔</span>
                       ) : c.is_archived ? (
-                        <span className="badge badge--inactive">Архів</span>
+                        <span className="badge badge--inactive">{t('archived')}</span>
                       ) : (
-                        <span className="badge badge--active">Активний</span>
+                        <span className="badge badge--active">{t('active_status')}</span>
                       )}
                     </td>
                   </tr>

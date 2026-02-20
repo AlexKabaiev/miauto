@@ -10,9 +10,8 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { key: 'orders', icon: '📋', label: 'orders' },
   { key: 'clients', icon: '👥', label: 'clients' },
-  // Future pages:
-  // { key: 'products', icon: '🔧', label: 'products' },
-  // { key: 'suppliers', icon: '🚚', label: 'suppliers' },
+  { key: 'products', icon: '🔧', label: 'products' },
+  { key: 'suppliers', icon: '🚚', label: 'suppliers' },
 ];
 
 export default function Sidebar({ activePage, onNavigate }: SidebarProps) {

@@ -201,7 +201,7 @@ export default function OrdersPage() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
           <span className="text-muted">{total.toLocaleString()} {t('orders').toLowerCase()}</span>
-          <button className="btn btn--primary" onClick={() => { setEditId(null); setFormOpen(true); }}>+ Нове замовлення</button>
+          <button className="btn btn--primary" onClick={() => { setEditId(null); setFormOpen(true); }}>+ {t('new_order')}</button>
         </div>
       </div>
 

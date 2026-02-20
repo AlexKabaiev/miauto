@@ -116,7 +116,7 @@ export default function ClientForm({ clientId, onClose, onSaved }: ClientFormPro
       onSaved();
       onClose();
     } catch (e: any) {
-      alert(e.message || 'Помилка збереження');
+      alert(e.message || t('save_error'));
     } finally {
       setSaving(false);
     }
@@ -128,50 +128,50 @@ export default function ClientForm({ clientId, onClose, onSaved }: ClientFormPro
       <div className="modal-panel">
         <div className="modal-panel__header">
           <span className="modal-panel__title">
-            {isEdit ? `Клієнт #${clientId}` : 'Новий клієнт'}
+            {isEdit ? `${t('edit_client')} #${clientId}` : t('new_client')}
           </span>
           <button className="modal-panel__close" onClick={onClose}>✕</button>
         </div>
 
         <div className="modal-panel__body">
           {loading ? (
-            <div className="loading-spinner"><div className="spinner" /> Завантаження...</div>
+            <div className="loading-spinner"><div className="spinner" /> {t('loading')}</div>
           ) : (
             <>
               {/* ── Main Info ── */}
               <div className="form-grid">
                 <div className="form-group form-grid--full">
-                  <label>ПІБ / Назва</label>
-                  <input className="form-input" value={fio} onChange={e => setFio(e.target.value)} placeholder="Прізвище Ім'я По батькові" />
+                  <label>{t('client_name')}</label>
+                  <input className="form-input" value={fio} onChange={e => setFio(e.target.value)} placeholder={t('client_name_placeholder')} />
                 </div>
                 <div className="form-group">
-                  <label>Телефон</label>
+                  <label>{t('phone')}</label>
                   <input className="form-input" value={phone} onChange={e => setPhone(e.target.value)} placeholder="0671234567" />
                 </div>
                 <div className="form-group">
-                  <label>Email</label>
+                  <label>{t('email')}</label>
                   <input className="form-input" type="email" value={email} onChange={e => setEmail(e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>ІПН / ЄДРПОУ</label>
+                  <label>{t('inn')}</label>
                   <input className="form-input" value={inn} onChange={e => setInn(e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>Фірма</label>
+                  <label>{t('firm')}</label>
                   <input className="form-input" value={firm} onChange={e => setFirm(e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>Знижка %</label>
+                  <label>{t('discount')}</label>
                   <input className="form-input" type="number" step="0.1" value={discount} onChange={e => setDiscount(e.target.value)} />
                 </div>
                 <div className="form-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', cursor: 'pointer' }}>
                     <input type="checkbox" checked={isBad} onChange={e => setIsBad(e.target.checked)} />
-                    <span style={{ textTransform: 'none', fontSize: 'var(--font-size-sm)' }}>Поганий клієнт</span>
+                    <span style={{ textTransform: 'none', fontSize: 'var(--font-size-sm)' }}>{t('bad_client')}</span>
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', cursor: 'pointer' }}>
                     <input type="checkbox" checked={isArchived} onChange={e => setIsArchived(e.target.checked)} />
-                    <span style={{ textTransform: 'none', fontSize: 'var(--font-size-sm)' }}>Архів</span>
+                    <span style={{ textTransform: 'none', fontSize: 'var(--font-size-sm)' }}>{t('archived')}</span>
                   </label>
                 </div>
               </div>
@@ -179,19 +179,19 @@ export default function ClientForm({ clientId, onClose, onSaved }: ClientFormPro
               {/* ── Vehicles ── */}
               <div className="form-section">
                 <div className="form-section__header">
-                  <span className="form-section__title">🚗 Автомобілі</span>
-                  <button className="btn btn--ghost btn--sm" onClick={addVehicle}>+ Додати</button>
+                  <span className="form-section__title">🚗 {t('vehicles')}</span>
+                  <button className="btn btn--ghost btn--sm" onClick={addVehicle}>+ {t('add')}</button>
                 </div>
                 <div className="data-table-wrapper">
                   <table className="positions-table">
                     <thead>
                       <tr>
-                        <th>Марка</th>
-                        <th>Модель</th>
+                        <th>{t('brand')}</th>
+                        <th>{t('model')}</th>
                         <th>VIN</th>
-                        <th>Держ. номер</th>
-                        <th style={{ width: 70 }}>Об'єм</th>
-                        <th style={{ width: 60 }}>Рік</th>
+                        <th>{t('license_plate')}</th>
+                        <th style={{ width: 70 }}>{t('engine_volume')}</th>
+                        <th style={{ width: 60 }}>{t('year')}</th>
                         <th style={{ width: 36 }}></th>
                       </tr>
                     </thead>
@@ -205,7 +205,7 @@ export default function ClientForm({ clientId, onClose, onSaved }: ClientFormPro
                           <td><input value={v.engine_volume} onChange={e => updateVehicle(v._key, 'engine_volume', e.target.value)} placeholder="2.0" /></td>
                           <td><input value={v.year} onChange={e => updateVehicle(v._key, 'year', e.target.value)} placeholder="2020" /></td>
                           <td>
-                            <button className="btn-remove" onClick={() => removeVehicle(v._key)} title="Видалити">✕</button>
+                            <button className="btn-remove" onClick={() => removeVehicle(v._key)} title={t('delete')}>✕</button>
                           </td>
                         </tr>
                       ))}
@@ -217,7 +217,7 @@ export default function ClientForm({ clientId, onClose, onSaved }: ClientFormPro
               {/* ── Notes ── */}
               <div className="form-grid" style={{ marginTop: 'var(--space-4)' }}>
                 <div className="form-group form-grid--full">
-                  <label>Примітка</label>
+                  <label>{t('note')}</label>
                   <textarea className="form-textarea" value={info} onChange={e => setInfo(e.target.value)} />
                 </div>
               </div>
@@ -226,13 +226,13 @@ export default function ClientForm({ clientId, onClose, onSaved }: ClientFormPro
         </div>
 
         <div className="modal-panel__footer">
-          <button className="btn btn--ghost" onClick={onClose}>Скасувати</button>
+          <button className="btn btn--ghost" onClick={onClose}>{t('cancel')}</button>
           <button
             className="btn btn--primary"
             onClick={handleSave}
             disabled={saving || !fio.trim()}
           >
-            {saving ? 'Збереження...' : isEdit ? 'Оновити' : 'Створити'}
+            {saving ? t('saving') : isEdit ? t('update') : t('create')}
           </button>
         </div>
       </div>

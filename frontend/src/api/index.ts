@@ -49,3 +49,23 @@ export const currencyApi = {
 export const dashboardApi = {
   getStats: () => request<any>('/dashboard/stats'),
 };
+
+/* ── Products ── */
+export const productsApi = {
+  list: (params?: Record<string, string>) =>
+    request<{ items: any[]; total: number }>(`/products?${new URLSearchParams(params)}`),
+  get: (id: number) => request<any>(`/products/${id}`),
+  groups: () => request<any[]>('/products/groups'),
+  manufacturers: () => request<any[]>('/products/manufacturers'),
+};
+
+/* ── Suppliers ── */
+export const suppliersApi = {
+  list: (params?: Record<string, string>) =>
+    request<{ items: any[]; total: number }>(`/suppliers?${new URLSearchParams(params)}`),
+  get: (id: number) => request<any>(`/suppliers/${id}`),
+  create: (data: any) => request<any>('/suppliers', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: number, data: any) =>
+    request<any>(`/suppliers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: number) => request<void>(`/suppliers/${id}`, { method: 'DELETE' }),
+};

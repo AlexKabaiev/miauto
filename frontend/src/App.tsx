@@ -4,8 +4,10 @@ import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import OrdersPage from './components/orders/OrdersPage';
 import ClientsPage from './components/clients/ClientsPage';
+import ProductsPage from './components/products/ProductsPage';
+import SuppliersPage from './components/suppliers/SuppliersPage';
 
-type Page = 'orders' | 'clients';
+type Page = 'orders' | 'clients' | 'products' | 'suppliers';
 
 export default function App() {
   const [page, setPage] = useState<Page>('orders');
@@ -27,6 +29,8 @@ export default function App() {
       <main className="main-content">
         {page === 'orders' && <OrdersPage />}
         {page === 'clients' && <ClientsPage />}
+        {page === 'products' && <ProductsPage />}
+        {page === 'suppliers' && <SuppliersPage />}
       </main>
     </div>
   );

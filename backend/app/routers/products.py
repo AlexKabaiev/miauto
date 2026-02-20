@@ -167,3 +167,13 @@ def update_supplier(supplier_id: int, data: SupplierUpdate, db: Session = Depend
     db.commit()
     db.refresh(supplier)
     return supplier
+
+
+@suppliers_router.delete("/{supplier_id}", status_code=204)
+def delete_supplier(supplier_id: int, db: Session = Depends(get_db)):
+    supplier = db.get(Supplier, supplier_id)
+    if not supplier:
+        raise HTTPException(404, "Постачальника не знайдено")
+    db.delete(supplier)
+    db.commit()
+    return None

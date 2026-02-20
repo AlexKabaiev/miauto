@@ -167,7 +167,7 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
       onSaved();
       onClose();
     } catch (e: any) {
-      alert(e.message || 'Помилка збереження');
+      alert(e.message || t('save_error'));
     } finally {
       setSaving(false);
     }
@@ -179,23 +179,23 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
       <div className="modal-panel">
         <div className="modal-panel__header">
           <span className="modal-panel__title">
-            {isEdit ? `Замовлення #${orderId}` : 'Нове замовлення'}
+            {isEdit ? `${t('edit_order')} #${orderId}` : t('new_order')}
           </span>
           <button className="modal-panel__close" onClick={onClose}>✕</button>
         </div>
 
         <div className="modal-panel__body">
           {loading ? (
-            <div className="loading-spinner"><div className="spinner" /> Завантаження...</div>
+            <div className="loading-spinner"><div className="spinner" /> {t('loading')}</div>
           ) : (
             <>
               {/* ── Client + Vehicle ── */}
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Клієнт</label>
+                  <label>{t('client')}</label>
                   <input
                     className="form-input"
-                    placeholder="Пошук клієнта..."
+                    placeholder={t('search_client')}
                     value={clientSearch}
                     onChange={e => setClientSearch(e.target.value)}
                     list="clients-datalist"
@@ -210,7 +210,7 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
                     value={clientId}
                     onChange={e => { setClientId(Number(e.target.value)); setVehicleId(''); }}
                   >
-                    <option value="">— Обрати —</option>
+                    <option value="">— {t('select')} —</option>
                     {clients.map(c => (
                       <option key={c.id} value={c.id}>{c.fio} {c.phone ? `(${c.phone})` : ''}</option>
                     ))}
@@ -218,14 +218,14 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
                 </div>
 
                 <div className="form-group">
-                  <label>Авто</label>
+                  <label>{t('vehicle')}</label>
                   <select
                     className="form-select"
                     value={vehicleId}
                     onChange={e => setVehicleId(Number(e.target.value))}
                     disabled={!clientId}
                   >
-                    <option value="">— Обрати —</option>
+                    <option value="">— {t('select')} —</option>
                     {clientVehicles.map((v: any) => (
                       <option key={v.id} value={v.id}>
                         {v.brand || ''} {v.model || ''} {v.vin ? `[${v.vin}]` : ''}
@@ -238,7 +238,7 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
               {/* ── Currency / Markup / Discount ── */}
               <div className="form-grid" style={{ marginTop: 'var(--space-4)' }}>
                 <div className="form-group">
-                  <label>Валюта</label>
+                  <label>{t('currency')}</label>
                   <select className="form-select" value={currency} onChange={e => setCurrency(e.target.value)}>
                     <option value="грн.">грн.</option>
                     <option value="USD">USD</option>
@@ -246,15 +246,15 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Курс</label>
+                  <label>{t('exchange_rate')}</label>
                   <input className="form-input" type="number" step="0.01" value={exchangeRate} onChange={e => setExchangeRate(e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>Націнка %</label>
+                  <label>{t('markup')}</label>
                   <input className="form-input" type="number" step="0.1" value={markup} onChange={e => setMarkup(e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>Знижка %</label>
+                  <label>{t('discount')}</label>
                   <input className="form-input" type="number" step="0.1" value={discount} onChange={e => setDiscount(e.target.value)} />
                 </div>
               </div>
@@ -262,19 +262,19 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
               {/* ── Positions ── */}
               <div className="form-section">
                 <div className="form-section__header">
-                  <span className="form-section__title">Позиції</span>
-                  <button className="btn btn--ghost btn--sm" onClick={addPos}>+ Додати</button>
+                  <span className="form-section__title">{t('positions')}</span>
+                  <button className="btn btn--ghost btn--sm" onClick={addPos}>+ {t('add')}</button>
                 </div>
                 <div className="data-table-wrapper">
                   <table className="positions-table">
                     <thead>
                       <tr>
-                        <th>Код</th>
-                        <th>Назва</th>
-                        <th style={{ width: 60 }}>К-ть</th>
-                        <th style={{ width: 90 }}>Закупка</th>
-                        <th style={{ width: 90 }}>Продаж</th>
-                        <th>Виробник</th>
+                        <th>{t('code')}</th>
+                        <th>{t('name')}</th>
+                        <th style={{ width: 60 }}>{t('quantity')}</th>
+                        <th style={{ width: 90 }}>{t('purchase_price')}</th>
+                        <th style={{ width: 90 }}>{t('sell_price')}</th>
+                        <th>{t('manufacturer')}</th>
                         <th style={{ width: 36 }}></th>
                       </tr>
                     </thead>
@@ -300,7 +300,7 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
                             <input value={p.manufacturer} onChange={e => updatePos(p._key, 'manufacturer', e.target.value)} placeholder="" />
                           </td>
                           <td>
-                            <button className="btn-remove" onClick={() => removePos(p._key)} title="Видалити">✕</button>
+                            <button className="btn-remove" onClick={() => removePos(p._key)} title={t('delete')}>✕</button>
                           </td>
                         </tr>
                       ))}
@@ -311,15 +311,15 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
                 {/* Totals summary */}
                 <div className="order-summary">
                   <div className="order-summary__item">
-                    <span className="order-summary__label">Закупка</span>
+                    <span className="order-summary__label">{t('purchase_price')}</span>
                     <span className="order-summary__value">{fmtMoney(totalPurchase)} ₴</span>
                   </div>
                   <div className="order-summary__item">
-                    <span className="order-summary__label">Продаж</span>
+                    <span className="order-summary__label">{t('sell_price')}</span>
                     <span className="order-summary__value fw-600">{fmtMoney(totalSell)} ₴</span>
                   </div>
                   <div className="order-summary__item">
-                    <span className="order-summary__label">Прибуток</span>
+                    <span className="order-summary__label">{t('profit')}</span>
                     <span className={`order-summary__value ${profit >= 0 ? 'text-accent' : 'text-danger'}`}>
                       {fmtMoney(profit)} ₴
                     </span>
@@ -330,11 +330,11 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
               {/* ── Info ── */}
               <div className="form-grid" style={{ marginTop: 'var(--space-4)' }}>
                 <div className="form-group form-grid--full">
-                  <label>Примітка</label>
+                  <label>{t('note')}</label>
                   <textarea className="form-textarea" value={info} onChange={e => setInfo(e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>Автор</label>
+                  <label>{t('author')}</label>
                   <input className="form-input" value={author} onChange={e => setAuthor(e.target.value)} />
                 </div>
               </div>
@@ -343,13 +343,13 @@ export default function OrderForm({ orderId, onClose, onSaved }: OrderFormProps)
         </div>
 
         <div className="modal-panel__footer">
-          <button className="btn btn--ghost" onClick={onClose}>Скасувати</button>
+          <button className="btn btn--ghost" onClick={onClose}>{t('cancel')}</button>
           <button
             className="btn btn--primary"
             onClick={handleSave}
             disabled={saving || !clientId}
           >
-            {saving ? 'Збереження...' : isEdit ? 'Оновити' : 'Створити'}
+            {saving ? t('saving') : isEdit ? t('update') : t('create')}
           </button>
         </div>
       </div>
