@@ -20,7 +20,7 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar__logo">
+      <div className="sidebar__logo" onClick={() => onNavigate('orders')}>
         <img src={logoImg} className="sidebar__logo-icon" alt="MIAUTO Logo" />
         <span>MIAUTO</span>
       </div>

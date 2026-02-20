@@ -232,27 +232,38 @@ a:hover {
   border-bottom: 1px solid var(--border-color);
   gap: var(--space-3);
   overflow: hidden;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar__logo:hover {
+  opacity: 0.8;
 }
 
 .sidebar__logo span {
-  background: linear-gradient(135deg, hsl(220, 100%, 70%), hsl(200, 100%, 60%));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  padding-bottom: 2px; /* Fix clipping */
+  color: rgb(60, 113, 221);
+  padding-bottom: 2px;
 }
 
 .sidebar__logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
   flex-shrink: 0;
-  filter: invert(1);
+  
+  /* Precisely convert black to rgb(60, 113, 221) */
+  filter: invert(41%) sepia(94%) saturate(1478%) hue-rotate(204deg) brightness(91%) contrast(92%) 
+          drop-shadow(0 0 8px rgba(60, 113, 221, 0.4));
+  
+  transition: transform var(--transition-normal), filter var(--transition-normal);
 }
 
-[data-theme="light"] .sidebar__logo-icon {
-  filter: none;
+.sidebar__logo:hover .sidebar__logo-icon {
+  transform: scale(1.1) translateX(5px);
+  filter: invert(41%) sepia(94%) saturate(1478%) hue-rotate(204deg) brightness(91%) contrast(92%) 
+          drop-shadow(0 0 12px rgba(60, 113, 221, 0.6));
 }
+
 
 .sidebar__nav {
   display: flex;
