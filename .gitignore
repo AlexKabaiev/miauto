@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.env
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Backend Data
+backend/data/
+
+# Node / Frontend
+node_modules/
+dist/
+.vite/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini

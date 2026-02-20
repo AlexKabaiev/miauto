@@ -1,0 +1,7 @@
+GR_ID,GRNAME,GR_COUNTDOLG,GR_PREDEFINED
+1,Запрос,F,T
+2,Оплачено,F,T
+3,Черновик,F,T
+4,Клиент,F,T
+5,Магазин,T,T
+6,Свой заказ,T,T
