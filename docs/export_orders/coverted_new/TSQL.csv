@@ -1,3 +1,0 @@
-TSQL_ID,SNAME,STEXT
-1,"Все заказы поместить в группу ""Клиент""","UPDATE ZAKAZ SET GROUPZ = 'Клиент'
-"
