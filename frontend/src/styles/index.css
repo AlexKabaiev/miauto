@@ -223,7 +223,7 @@ a:hover {
   display: flex;
   align-items: center;
   padding: 0 var(--space-5);
-  font-family: 'Exo 2', sans-serif;
+  font-family: "Exo 2", sans-serif;
   font-size: 1.75rem;
   font-weight: 900;
   font-style: italic;
@@ -250,20 +250,21 @@ a:hover {
   height: 64px;
   object-fit: contain;
   flex-shrink: 0;
-  
+
   /* Precisely convert black to rgb(60, 113, 221) */
-  filter: invert(41%) sepia(94%) saturate(1478%) hue-rotate(204deg) brightness(91%) contrast(92%) 
-          drop-shadow(0 0 8px rgba(60, 113, 221, 0.4));
-  
-  transition: transform var(--transition-normal), filter var(--transition-normal);
+  filter: invert(41%) sepia(94%) saturate(1478%) hue-rotate(204deg)
+    brightness(91%) contrast(92%) drop-shadow(0 0 8px rgba(60, 113, 221, 0.4));
+
+  transition:
+    transform var(--transition-normal),
+    filter var(--transition-normal);
 }
 
 .sidebar__logo:hover .sidebar__logo-icon {
   transform: scale(1.1) translateX(5px);
-  filter: invert(41%) sepia(94%) saturate(1478%) hue-rotate(204deg) brightness(91%) contrast(92%) 
-          drop-shadow(0 0 12px rgba(60, 113, 221, 0.6));
+  filter: invert(41%) sepia(94%) saturate(1478%) hue-rotate(204deg)
+    brightness(91%) contrast(92%) drop-shadow(0 0 12px rgba(60, 113, 221, 0.6));
 }
-
 
 .sidebar__nav {
   display: flex;
@@ -686,8 +687,12 @@ a:hover {
 }
 
 @keyframes fadeOverlay {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-panel {
@@ -705,8 +710,12 @@ a:hover {
 }
 
 @keyframes slideIn {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .modal-panel__header {
@@ -809,6 +818,12 @@ a:hover {
 
 .form-select {
   cursor: pointer;
+}
+
+.form-select option,
+datalist option {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
 }
 
 /* ─── Section within form ─── */
@@ -937,4 +952,3 @@ a:hover {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-

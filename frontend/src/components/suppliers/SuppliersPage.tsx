@@ -36,6 +36,10 @@ export default function SuppliersPage() {
         limit: String(PAGE_SIZE),
       };
       if (search) params.search = search;
+      if (sorting.length > 0) {
+        params.sort_by = sorting[0].id;
+        params.sort_dir = sorting[0].desc ? 'desc' : 'asc';
+      }
       const res = await suppliersApi.list(params);
       setData(res.items);
       setTotal(res.total);
@@ -44,7 +48,7 @@ export default function SuppliersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, sorting]);
 
   useEffect(() => {
     fetchSuppliers();

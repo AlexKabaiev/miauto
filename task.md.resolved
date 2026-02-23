@@ -1,0 +1,50 @@
+# MIAUTO — Project Tasks
+
+## Phase 1: Planning
+
+- [x] Analyze existing data sources (CSV files, DB schema)
+- [x] Analyze Vortex CRM reference documentation and screenshots
+- [x] Define technology stack (FastAPI + React/Vite + SQLite)
+- [x] Create detailed implementation plan
+- [x] Get user approval on implementation plan
+
+## Phase 2: Backend Setup
+
+- [x] Initialize Python project with FastAPI + SQLAlchemy
+- [x] Create SQLAlchemy models (Client, Order, Product, Supplier, Payment, User)
+- [x] Create Pydantic schemas (CRUD variants for all entities)
+- [x] Create CSV → SQLite migration script ([import_csv.py](file:///d:/Alex/AI/Antigravity/Develop/MIAUTO/backend/app/migrations/import_csv.py))
+- [x] Install dependencies and run initial data import
+
+## Phase 3: API Development
+
+- [x] Orders CRUD endpoints (+ positions + payments)
+- [x] Clients CRUD endpoints (+ vehicles)
+- [x] Products/Suppliers CRUD endpoints
+- [x] Currency exchange rate endpoint (Monobank API)
+- [x] Dashboard stats endpoint
+- [x] Verify API endpoints return correct data
+
+## Phase 4: Frontend Setup
+
+- [x] Initialize React + Vite + TypeScript project
+- [x] Create design system (CSS variables, dark/light themes, animations)
+- [x] Layout: Header with currency widget, Sidebar navigation
+- [x] i18n setup (UA/RU)
+- [x] TypeScript types matching backend schemas
+- [x] API client module
+
+## Phase 5: Frontend Features
+
+- [x] Orders table (TanStack Table, sorting, search, pagination, filter chips)
+- [x] Dashboard stats cards (active orders, debt, revenue, clients)
+- [x] Clients list with search/pagination
+- [x] Order form (create/edit with positions)
+- [x] Client form (create/edit with vehicles)
+- [ ] Product catalog view
+- [ ] i18n completion for all labels
+
+## Phase 6: Packaging
+
+- [ ] PyInstaller .exe build
+- [ ] End-to-end testing on clean Windows 11

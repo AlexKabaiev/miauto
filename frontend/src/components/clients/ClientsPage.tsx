@@ -1,10 +1,20 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+  type SortingState,
+} from '@tanstack/react-table';
 import { useTranslation } from 'react-i18next';
 import { clientsApi } from '../../api';
 import ClientForm from './ClientForm';
 import type { ClientListItem } from '../../types';
 
 const PAGE_SIZE = 30;
+
+const columnHelper = createColumnHelper<ClientListItem>();
 
 export default function ClientsPage() {
   const { t } = useTranslation();
@@ -14,6 +24,7 @@ export default function ClientsPage() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'fio', desc: false }]);
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
@@ -25,6 +36,10 @@ export default function ClientsPage() {
         limit: String(PAGE_SIZE),
       };
       if (search) params.search = search;
+      if (sorting.length > 0) {
+        params.sort_by = sorting[0].id;
+        params.sort_dir = sorting[0].desc ? 'desc' : 'asc';
+      }
       const res = await clientsApi.list(params);
       setData(res.items);
       setTotal(res.total);
@@ -33,7 +48,7 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, sorting]);
 
   useEffect(() => { fetchClients(); }, [fetchClients]);
 
@@ -41,6 +56,62 @@ export default function ClientsPage() {
     const timer = setTimeout(() => { setSearch(searchInput); setPage(0); }, 400);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('id', {
+        header: () => 'ID',
+        cell: info => <span className="fw-600">{info.getValue()}</span>,
+        size: 60,
+      }),
+      columnHelper.accessor('fio', {
+        header: () => t('client'),
+        cell: info => info.getValue(),
+        size: 250,
+      }),
+      columnHelper.accessor('phone', {
+        header: () => t('phone'),
+        cell: info => <span className="text-muted">{info.getValue() || '—'}</span>,
+        size: 150,
+      }),
+      columnHelper.accessor('firm', {
+        header: () => t('firm'),
+        cell: info => <span className="text-muted">{info.getValue() || '—'}</span>,
+        size: 200,
+      }),
+      columnHelper.accessor('discount', {
+        header: () => t('discount'),
+        cell: info => {
+          const v = info.getValue();
+          return v > 0 ? `${v}%` : '—';
+        },
+        meta: { className: 'num' },
+        size: 100,
+      }),
+      columnHelper.accessor('is_bad', {
+        id: 'status',
+        header: () => t('status'),
+        cell: info => {
+          const c = info.row.original;
+          if (c.is_bad) return <span className="badge badge--danger">⛔</span>;
+          if (c.is_archived) return <span className="badge badge--inactive">{t('archived')}</span>;
+          return <span className="badge badge--active">{t('active_status')}</span>;
+        },
+        size: 120,
+      }),
+    ],
+    [t],
+  );
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    manualSorting: true,
+  });
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -71,32 +142,39 @@ export default function ClientsPage() {
           <>
             <table className="data-table">
               <thead>
-                <tr>
-                  <th style={{ width: 60 }}>ID</th>
-                  <th>{t('client')}</th>
-                  <th>{t('phone')}</th>
-                  <th>{t('firm')}</th>
-                  <th className="num">{t('discount')}</th>
-                  <th>{t('status')}</th>
-                </tr>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => {
+                      const meta = header.column.columnDef.meta as any;
+                      const sorted = header.column.getIsSorted();
+                      return (
+                        <th
+                          key={header.id}
+                          className={`${meta?.className || ''} ${sorted ? 'sorted' : ''}`}
+                          style={{ width: header.getSize() }}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          <span className="sort-arrow">
+                            {sorted === 'asc' ? '▲' : sorted === 'desc' ? '▼' : '⇅'}
+                          </span>
+                        </th>
+                      );
+                    })}
+                  </tr>
+                ))}
               </thead>
               <tbody>
-                {data.map(c => (
-                  <tr key={c.id} onClick={() => { setEditId(c.id); setFormOpen(true); }}>
-                    <td className="fw-600">{c.id}</td>
-                    <td>{c.fio}</td>
-                    <td className="text-muted">{c.phone || '—'}</td>
-                    <td className="text-muted">{c.firm || '—'}</td>
-                    <td className="num">{c.discount > 0 ? `${c.discount}%` : '—'}</td>
-                    <td>
-                      {c.is_bad ? (
-                        <span className="badge badge--danger">⛔</span>
-                      ) : c.is_archived ? (
-                        <span className="badge badge--inactive">{t('archived')}</span>
-                      ) : (
-                        <span className="badge badge--active">{t('active_status')}</span>
-                      )}
-                    </td>
+                {table.getRowModel().rows.map(row => (
+                  <tr key={row.id} onClick={() => { setEditId(row.original.id); setFormOpen(true); }}>
+                    {row.getVisibleCells().map(cell => {
+                      const meta = cell.column.columnDef.meta as any;
+                      return (
+                        <td key={cell.id} className={meta?.className || ''}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
