@@ -57,6 +57,10 @@ export const productsApi = {
   get: (id: number) => request<any>(`/products/${id}`),
   groups: () => request<any[]>('/products/groups'),
   manufacturers: () => request<any[]>('/products/manufacturers'),
+  create: (data: any) => request<any>('/products', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: number, data: any) =>
+    request<any>(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: number) => request<void>(`/products/${id}`, { method: 'DELETE' }),
 };
 
 /* ── Suppliers ── */

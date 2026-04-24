@@ -41,7 +41,7 @@
 - [x] Clients list with search/pagination
 - [x] Order form (create/edit with positions)
 - [x] Client form (create/edit with vehicles)
-- [ ] Product catalog view
+- [x] Product catalog view
 - [ ] i18n completion for all labels
 
 ## Phase 6: Packaging

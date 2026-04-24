@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
 import { productsApi } from "../../api";
+import ProductForm from "./ProductForm";
 import type { ProductListItem, ProductGroup } from "../../types/products";
 
 const PAGE_SIZE = 50;
@@ -37,6 +38,8 @@ export default function ProductsPage() {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "name", desc: false },
   ]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
 
   // Groups list for filtering
   const [groups, setGroups] = useState<ProductGroup[]>([]);
@@ -211,9 +214,14 @@ export default function ProductsPage() {
             ))}
           </div>
         </div>
-        <span className="text-muted">
-          {total.toLocaleString()} {t("products").toLowerCase()}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <span className="text-muted">
+            {total.toLocaleString()} {t("products").toLowerCase()}
+          </span>
+          <button className="btn btn--primary" onClick={() => { setEditId(null); setFormOpen(true); }}>
+            + {t("new_product")}
+          </button>
+        </div>
       </div>
 
       <div className="data-table-wrapper">
@@ -257,7 +265,7 @@ export default function ProductsPage() {
               </thead>
               <tbody>
                 {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id}>
+                  <tr key={row.id} onClick={() => { setEditId(row.original.id); setFormOpen(true); }} style={{ cursor: "pointer" }}>
                     {row.getVisibleCells().map((cell) => {
                       const meta = cell.column.columnDef.meta as any;
                       return (
@@ -298,6 +306,15 @@ export default function ProductsPage() {
           </>
         )}
       </div>
+
+      {formOpen && (
+        <ProductForm
+          productId={editId}
+          groups={groups}
+          onClose={() => setFormOpen(false)}
+          onSaved={() => fetchProducts()}
+        />
+      )}
     </div>
   );
 }
