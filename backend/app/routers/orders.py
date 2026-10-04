@@ -6,7 +6,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.client import Client, ClientVehicle
@@ -35,6 +35,7 @@ def _order_to_list_item(o: Order) -> OrderListItem:
 
     return OrderListItem(
         id=o.id,
+        client_id=o.client_id,
         date=o.date,
         client_name=o.client.fio if o.client else "—",
         client_phone=o.client.phone if o.client else None,
@@ -61,6 +62,7 @@ def _order_to_read(o: Order) -> OrderRead:
             id=p.id,
             order_id=p.order_id,
             code=p.code,
+            analogs=p.analogs,
             name=p.name,
             supplier_id=p.supplier_id,
             quantity=p.quantity,
@@ -103,11 +105,18 @@ def _order_to_read(o: Order) -> OrderRead:
     )
 
 
+# Дозволені колонки для сортування (захист від довільного getattr)
+_ALLOWED_SORT_COLS = {"id", "date", "total", "debt", "paid", "client_id", "group"}
+
+
 def _recalculate_order(order: Order) -> None:
-    """Recalculate total and debt from positions and payments."""
-    order.total = sum(
+    """Recalculate total (з урахуванням markup/discount) та debt."""
+    base = sum(
         (p.price_sell * p.quantity for p in order.positions), Decimal("0.00")
     )
+    markup_factor = Decimal(str(1 + (order.markup or 0.0) / 100))
+    discount_factor = Decimal(str(1 - (order.discount or 0.0) / 100))
+    order.total = (base * markup_factor * discount_factor).quantize(Decimal("0.01"))
     order.debt = order.total - order.paid
 
 
@@ -115,8 +124,10 @@ def _recalculate_order(order: Order) -> None:
 @router.get("", response_model=dict)
 def list_orders(
     search: Optional[str] = Query(None),
+    client_id: Optional[int] = Query(None),
     group: Optional[str] = Query(None),
     is_active: Optional[bool] = Query(None),
+    status_filter: Optional[str] = Query(None),
     date_from: Optional[datetime] = Query(None),
     date_to: Optional[datetime] = Query(None),
     sort_by: str = Query("date"),
@@ -125,14 +136,14 @@ def list_orders(
     limit: int = 50,
     db: Session = Depends(get_db),
 ):
-    q = db.query(Order).options(
-        joinedload(Order.client),
-        joinedload(Order.vehicle),
-        joinedload(Order.positions),
-        joinedload(Order.payments),
-    )
+    # Моделі вже мають lazy="selectin" — joinedload зайвий і призводить до дублювання
+    q = db.query(Order)
 
-    if is_active is not None:
+    if status_filter == "completed":
+        q = q.filter(Order.group == "Виконано")
+    elif status_filter == "active":
+        q = q.filter(~Order.group.in_(["Виконано", "Скасовано"]))
+    elif is_active is not None:
         q = q.filter(Order.is_active == is_active)
     if group:
         q = q.filter(Order.group == group)
@@ -140,14 +151,18 @@ def list_orders(
         q = q.filter(Order.date >= date_from)
     if date_to:
         q = q.filter(Order.date <= date_to)
+    if client_id is not None:
+        q = q.filter(Order.client_id == client_id)
     if search:
         like = f"%{search}%"
-        q = q.join(Order.client).filter(
+        # Явний JOIN замість relationship join — уникає конфлікту з client_id фільтром
+        q = q.join(Client, Order.client_id == Client.id).filter(
             or_(Client.fio.ilike(like), Client.phone.ilike(like))
         )
 
-    # Sorting
-    sort_col = getattr(Order, sort_by, Order.date)
+    # Sorting — whitelist захищає від довільного getattr
+    safe_sort = sort_by if sort_by in _ALLOWED_SORT_COLS else "date"
+    sort_col = getattr(Order, safe_sort)
     if sort_dir == "asc":
         q = q.order_by(sort_col.asc())
     else:
@@ -179,7 +194,7 @@ def create_order(data: OrderCreate, db: Session = Depends(get_db)):
         raise HTTPException(404, "Клієнт не знайдений")
 
     positions_data = data.positions
-    order_data = data.model_dump(exclude={"positions"})
+    order_data = data.model_dump(exclude={"positions", "paid"})
     order = Order(**order_data)
     db.add(order)
     db.flush()  # get order.id
@@ -188,8 +203,21 @@ def create_order(data: OrderCreate, db: Session = Depends(get_db)):
         pos = OrderPosition(order_id=order.id, **pos_data.model_dump())
         db.add(pos)
 
+    if data.paid is not None and data.paid > 0:
+        payment = Payment(order_id=order.id, amount=data.paid, comment="Початкова оплата", author=order.author)
+        order.payments.append(payment)
+
     db.flush()
     _recalculate_order(order)
+
+    # Валідація статусу "Виконано"
+    if order.group == "Виконано":
+        if order.debt > 0 or order.paid < order.total:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Неможливо встановити статус 'Виконано', оскільки замовлення не оплачено повністю. Поточний борг: {order.debt} грн."
+            )
+
     db.commit()
     db.refresh(order)
     return _order_to_read(order)
@@ -201,8 +229,41 @@ def update_order(order_id: int, data: OrderUpdate, db: Session = Depends(get_db)
     order = db.get(Order, order_id)
     if not order:
         raise HTTPException(404, "Замовлення не знайдено")
-    for key, value in data.model_dump(exclude_unset=True).items():
+
+    update_data = data.model_dump(exclude_unset=True)
+    positions_list = update_data.pop("positions", None)
+    paid_val = update_data.pop("paid", None)
+
+    for key, value in update_data.items():
         setattr(order, key, value)
+
+    if positions_list is not None:
+        # Cascade delete-orphan автоматично видалить старі позиції
+        order.positions = [
+            OrderPosition(order_id=order_id, **pos_dict)
+            for pos_dict in positions_list
+        ]
+        db.flush()
+
+    if paid_val is not None:
+        current_paid = order.paid
+        if paid_val != current_paid:
+            order.payments.clear()
+            if paid_val > 0:
+                payment = Payment(order_id=order_id, amount=paid_val, comment="Оплата", author=order.author)
+                order.payments.append(payment)
+            db.flush()
+
+    _recalculate_order(order)
+
+    # Валідація статусу "Виконано"
+    if order.group == "Виконано":
+        if order.debt > 0 or order.paid < order.total:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Неможливо встановити статус 'Виконано', оскільки замовлення не оплачено повністю. Поточний борг: {order.debt} грн."
+            )
+
     db.commit()
     db.refresh(order)
     return _order_to_read(order)

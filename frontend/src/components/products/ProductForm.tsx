@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { productsApi, suppliersApi } from '../../api';
 import type { ProductGroup, ManufacturerItem } from '../../types/products';
 import type { PaginatedResponse, Supplier } from '../../types';
+import { useResizableModal } from '../../hooks/useResizableModal';
 
 interface ProductFormProps {
   productId: number | null;
@@ -23,6 +24,7 @@ export default function ProductForm({ productId, groups, onClose, onSaved }: Pro
   const [stock, setStock] = useState('0');
   const [price, setPrice] = useState('0');
   const [location, setLocation] = useState('');
+  const [analogs, setAnalogs] = useState('');
   const [info, setInfo] = useState('');
 
   const [manufacturers, setManufacturers] = useState<ManufacturerItem[]>([]);
@@ -30,6 +32,8 @@ export default function ProductForm({ productId, groups, onClose, onSaved }: Pro
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const panelRef = useResizableModal('miauto_product_modal_width', 650);
 
   // Load catalogs
   useEffect(() => {
@@ -50,6 +54,7 @@ export default function ProductForm({ productId, groups, onClose, onSaved }: Pro
       setStock(String(p.stock || 0));
       setPrice(String(p.price || 0));
       setLocation(p.location || '');
+      setAnalogs(p.analogs || '');
       setInfo(p.info || '');
     }).finally(() => setLoading(false));
   }, [productId, isEdit]);
@@ -67,6 +72,7 @@ export default function ProductForm({ productId, groups, onClose, onSaved }: Pro
         stock: parseInt(stock) || 0,
         price: parseFloat(price) || 0,
         location: location || null,
+        analogs: analogs.trim() || null,
         info: info || null,
       };
       
@@ -102,7 +108,7 @@ export default function ProductForm({ productId, groups, onClose, onSaved }: Pro
   return (
     <>
       <div className="modal-overlay" onClick={onClose} />
-      <div className="modal-panel">
+      <div className="modal-panel" ref={panelRef}>
         <div className="modal-panel__header">
           <span className="modal-panel__title">
             {isEdit ? `${t('edit_product')} #${productId}` : t('new_product')}
@@ -122,6 +128,10 @@ export default function ProductForm({ productId, groups, onClose, onSaved }: Pro
               <div className="form-group">
                 <label>{t('product_code')}</label>
                 <input className="form-input" value={code} onChange={e => setCode(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>{t('analogs_help')}</label>
+                <input className="form-input" value={analogs} onChange={e => setAnalogs(e.target.value)} placeholder={t('analogs_placeholder')} />
               </div>
               <div className="form-group">
                 <label>{t('product_group')}</label>

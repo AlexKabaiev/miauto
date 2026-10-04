@@ -42,9 +42,12 @@
 - [x] Order form (create/edit with positions)
 - [x] Client form (create/edit with vehicles)
 - [x] Product catalog view
-- [ ] i18n completion for all labels
+- [x] i18n completion for all labels
 
 ## Phase 6: Packaging
 
-- [ ] PyInstaller .exe build
-- [ ] End-to-end testing on clean Windows 11
+- [x] Rebuild frontend distribution
+- [x] PyInstaller .exe build
+- [x] Verification and error checks
+
+

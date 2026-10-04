@@ -25,7 +25,7 @@ class VehicleCreate(VehicleBase):
 
 
 class VehicleUpdate(VehicleBase):
-    pass
+    id: Optional[int] = None
 
 
 class VehicleRead(VehicleBase):
@@ -38,6 +38,18 @@ class VehicleRead(VehicleBase):
 # ---------------------------------------------------------------------------
 # Client
 # ---------------------------------------------------------------------------
+class StatusHistoryRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    client_id: int
+    old_status: str
+    new_status: str
+    comment: Optional[str] = None
+    author: Optional[str] = None
+    created_at: datetime
+
+
 class ClientBase(BaseModel):
     fio: str
     phone: Optional[str] = None
@@ -48,10 +60,17 @@ class ClientBase(BaseModel):
     is_bad: bool = False
     is_archived: bool = False
     info: Optional[str] = None
+    status: str = "Новий"
+    flags: str = ""
+    problem_reason: Optional[str] = None
+    problem_comment: Optional[str] = None
+    status_updated_at: Optional[datetime] = None
+    status_updated_by: Optional[str] = None
+    total_debt: float = 0.0
 
 
 class ClientCreate(ClientBase):
-    pass
+    vehicles: list[VehicleCreate] = []
 
 
 class ClientUpdate(BaseModel):
@@ -65,6 +84,13 @@ class ClientUpdate(BaseModel):
     is_bad: Optional[bool] = None
     is_archived: Optional[bool] = None
     info: Optional[str] = None
+    status: Optional[str] = None
+    flags: Optional[str] = None
+    problem_reason: Optional[str] = None
+    problem_comment: Optional[str] = None
+    manager_name: Optional[str] = None
+    change_comment: Optional[str] = None
+    vehicles: Optional[list[VehicleUpdate]] = None
 
 
 class ClientRead(ClientBase):
@@ -73,6 +99,7 @@ class ClientRead(ClientBase):
     id: int
     created_at: datetime
     vehicles: list[VehicleRead] = []
+    status_history: list[StatusHistoryRead] = []
 
 
 class ClientListItem(BaseModel):
@@ -86,3 +113,9 @@ class ClientListItem(BaseModel):
     discount: float = 0.0
     is_bad: bool = False
     is_archived: bool = False
+    status: str = "Новий"
+    flags: str = ""
+    problem_reason: Optional[str] = None
+    problem_comment: Optional[str] = None
+    total_debt: float = 0.0
+

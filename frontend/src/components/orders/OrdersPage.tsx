@@ -37,11 +37,13 @@ export default function OrdersPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [clientIdSearch, setClientIdSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('active');
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([{ id: 'date', desc: true }]);
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const [statsVersion, setStatsVersion] = useState(0);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -51,7 +53,8 @@ export default function OrdersPage() {
         limit: String(PAGE_SIZE),
       };
       if (search) params.search = search;
-      if (statusFilter === 'active') params.is_active = 'true';
+      if (clientIdSearch) params.client_id = clientIdSearch;
+      if (statusFilter) params.status_filter = statusFilter;
       if (sorting.length > 0) {
         params.sort_by = sorting[0].id;
         params.sort_dir = sorting[0].desc ? 'desc' : 'asc';
@@ -64,7 +67,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, sorting]);
+  }, [page, search, clientIdSearch, statusFilter, sorting]);
 
   useEffect(() => {
     fetchOrders();
@@ -72,13 +75,15 @@ export default function OrdersPage() {
 
   // Debounce search
   const [searchInput, setSearchInput] = useState('');
+  const [clientIdSearchInput, setClientIdSearchInput] = useState('');
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearch(searchInput);
+      setClientIdSearch(clientIdSearchInput);
       setPage(0);
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchInput]);
+  }, [searchInput, clientIdSearchInput]);
 
   const columns = useMemo(
     () => [
@@ -96,6 +101,11 @@ export default function OrdersPage() {
         header: () => t('client'),
         cell: info => info.getValue(),
         size: 200,
+      }),
+      columnHelper.accessor('client_id', {
+        header: () => t('client_id_col'),
+        cell: info => <span className="text-muted">{info.getValue() || '—'}</span>,
+        size: 100,
       }),
       columnHelper.accessor('client_phone', {
         header: () => t('phone'),
@@ -116,7 +126,7 @@ export default function OrdersPage() {
       columnHelper.accessor('total', {
         header: () => t('total'),
         cell: info => <span className="fw-600">{fmtMoney(info.getValue())}</span>,
-        meta: { className: 'num' },
+        meta: { className: 'num col-money' },
         size: 110,
       }),
       columnHelper.accessor('paid', {
@@ -125,7 +135,7 @@ export default function OrdersPage() {
           const v = parseFloat(info.getValue());
           return <span className={v > 0 ? 'text-success' : 'text-muted'}>{fmtMoney(info.getValue())}</span>;
         },
-        meta: { className: 'num' },
+        meta: { className: 'num col-money' },
         size: 110,
       }),
       columnHelper.accessor('debt', {
@@ -134,33 +144,72 @@ export default function OrdersPage() {
           const v = parseFloat(info.getValue());
           return <span className={v > 0 ? 'text-danger fw-600' : 'text-muted'}>{fmtMoney(info.getValue())}</span>;
         },
-        meta: { className: 'num' },
+        meta: { className: 'num col-money' },
         size: 110,
-      }),
-      columnHelper.accessor('profit', {
-        header: () => t('profit'),
-        cell: info => {
-          const v = parseFloat(info.getValue());
-          return <span className={v > 0 ? 'text-accent fw-600' : 'text-muted'}>{fmtMoney(info.getValue())}</span>;
-        },
-        meta: { className: 'num' },
-        size: 100,
       }),
       columnHelper.accessor('group', {
         header: () => t('status'),
         cell: info => {
-          const g = info.getValue();
-          const row = info.row.original;
+          const val = info.getValue();
+          const orderId = info.row.original.id;
+          const getStatusClass = (status: string) => {
+            switch (status) {
+              case 'Нове': return 'badge--status-new';
+              case 'В обробці': return 'badge--status-processing';
+              case 'Очікує запчастини': return 'badge--status-waiting';
+              case 'Готове до видачі': return 'badge--status-ready';
+              case 'Виконано': return 'badge--status-completed';
+              case 'Скасовано': return 'badge--status-cancelled';
+              default: return 'badge--inactive';
+            }
+          };
           return (
-            <span className={`badge ${row.is_active ? 'badge--active' : 'badge--inactive'}`}>
-              {g}
-            </span>
+            <select
+              className={`badge status-select ${getStatusClass(val)}`}
+              value={val}
+              onClick={e => e.stopPropagation()}
+              onChange={async e => {
+                e.stopPropagation();
+                const newStatus = e.target.value;
+                if (newStatus === 'Виконано') {
+                  const order = info.row.original;
+                  const debtNum = parseFloat(String(order.debt)) || 0;
+                  const totalNum = parseFloat(String(order.total)) || 0;
+                  const paidNum = parseFloat(String(order.paid)) || 0;
+                  if (debtNum > 0.01 || paidNum < totalNum) {
+                    alert(`Неможливо встановити статус 'Виконано', оскільки замовлення не оплачено повністю. Поточний борг: ${debtNum.toFixed(2)} грн.`);
+                    fetchOrders();
+                    return;
+                  }
+                }
+                try {
+                  await ordersApi.update(orderId, { group: newStatus });
+                  fetchOrders();
+                  setStatsVersion(v => v + 1);
+                } catch (err: any) {
+                  console.error('Failed to update status:', err);
+                  alert(err.message || 'Не вдалося оновити статус');
+                  fetchOrders();
+                }
+              }}
+            >
+              {!['Нове', 'В обробці', 'Очікує запчастини', 'Готове до видачі', 'Виконано', 'Скасовано'].includes(val) && (
+                <option value={val}>{val}</option>
+              )}
+              <option value="Нове">{t('status_new')}</option>
+              <option value="В обробці">{t('status_processing')}</option>
+              <option value="Очікує запчастини">{t('status_waiting')}</option>
+              <option value="Готове до видачі">{t('status_ready')}</option>
+              <option value="Виконано">{t('status_completed')}</option>
+              <option value="Скасовано">{t('status_cancelled')}</option>
+            </select>
           );
         },
-        size: 110,
+        meta: { className: 'col-status' },
+        size: 190,
       }),
     ],
-    [t],
+    [t, fetchOrders],
   );
 
   const table = useReactTable({
@@ -177,10 +226,17 @@ export default function OrdersPage() {
 
   return (
     <div className="fade-in">
-      <StatsCards />
+      <StatsCards refreshTrigger={statsVersion} />
 
       <div className="table-toolbar">
         <div className="table-toolbar__left">
+          <input
+            className="search-input"
+            style={{ width: '130px' }}
+            placeholder={t('search_client_id')}
+            value={clientIdSearchInput}
+            onChange={e => setClientIdSearchInput(e.target.value)}
+          />
           <input
             className="search-input"
             placeholder={t('search_orders')}
@@ -188,7 +244,7 @@ export default function OrdersPage() {
             onChange={e => setSearchInput(e.target.value)}
           />
           <div className="filter-chips">
-            {['all', 'active'].map(f => (
+            {['all', 'active', 'completed'].map(f => (
               <button
                 key={f}
                 className={`filter-chip ${statusFilter === f ? 'filter-chip--active' : ''}`}
@@ -254,7 +310,9 @@ export default function OrdersPage() {
             </table>
             <div className="pagination">
               <span>
-                {t('showing')} {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} {t('of')} {total}
+                {total === 0
+                  ? `${t('showing')} 0 ${t('of')} 0`
+                  : `${t('showing')} ${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, total)} ${t('of')} ${total}`}
               </span>
               <div className="pagination__buttons">
                 <button className="btn btn--ghost btn--sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
@@ -273,7 +331,10 @@ export default function OrdersPage() {
         <OrderForm
           orderId={editId}
           onClose={() => setFormOpen(false)}
-          onSaved={() => fetchOrders()}
+          onSaved={() => {
+            fetchOrders();
+            setStatsVersion(v => v + 1);
+          }}
         />
       )}
     </div>

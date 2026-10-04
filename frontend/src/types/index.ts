@@ -13,6 +13,16 @@ export interface ClientVehicle {
   info: string | null;
 }
 
+export interface ClientStatusHistory {
+  id: number;
+  client_id: number;
+  old_status: string;
+  new_status: string;
+  comment: string | null;
+  author: string | null;
+  created_at: string;
+}
+
 export interface Client {
   id: number;
   fio: string;
@@ -26,6 +36,13 @@ export interface Client {
   info: string | null;
   created_at: string;
   vehicles: ClientVehicle[];
+  status?: string;
+  flags?: string;
+  problem_reason?: string | null;
+  problem_comment?: string | null;
+  status_updated_at?: string | null;
+  status_updated_by?: string | null;
+  status_history?: ClientStatusHistory[];
 }
 
 export interface ClientListItem {
@@ -36,12 +53,18 @@ export interface ClientListItem {
   discount: number;
   is_bad: boolean;
   is_archived: boolean;
+  status?: string;
+  flags?: string;
+  problem_reason?: string | null;
+  problem_comment?: string | null;
 }
+
 
 export interface OrderPosition {
   id: number;
   order_id: number;
   code: string;
+  analogs: string | null;
   name: string;
   supplier_id: number | null;
   quantity: number;
@@ -57,6 +80,7 @@ export interface OrderPosition {
 
 export interface OrderListItem {
   id: number;
+  client_id: number;
   date: string;
   client_name: string;
   client_phone: string | null;
@@ -106,8 +130,9 @@ export interface CurrencyRate {
 export interface DashboardStats {
   active_orders: number;
   total_debt: number;
-  month_revenue: number;
+  month_profit: number;
   total_clients: number;
+  orders_with_debt: number;
   month_orders: number;
 }
 

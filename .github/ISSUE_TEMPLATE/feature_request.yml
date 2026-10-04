@@ -1,0 +1,30 @@
+name: ✨ Пропозиція функціоналу (Feature Request)
+description: Запропонуйте нову ідею або покращення для застосунку MIAUTO
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Поділіться вашою ідеєю для розширення можливостей або зручності роботи в MIAUTO!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Яку проблему це вирішує?
+      description: Стислий опис проблеми чи незручності (наприклад: "Мені складно швидко фільтрувати замовлення за клієнтом...").
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Запропоноване рішення
+      description: Як на вашу думку має працювати цей функціонал.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативні рішення
+      description: Які інші варіанти або обхідні шляхи ви розглядали?
+    validations:
+      required: false

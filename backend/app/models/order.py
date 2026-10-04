@@ -86,6 +86,7 @@ class OrderPosition(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), index=True)
     code: Mapped[str] = mapped_column(String(100), index=True, comment="Артикул")
+    analogs: Mapped[Optional[str]] = mapped_column(Text, default=None, comment="Коди аналогів")
     name: Mapped[str] = mapped_column(String(500))
     supplier_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("suppliers.id"), default=None

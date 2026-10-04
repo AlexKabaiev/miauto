@@ -7,6 +7,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.order import OrderPosition
 from app.models.product import Manufacturer, Product, ProductGroup
 from app.models.supplier import Supplier
 from app.schemas.product import (
@@ -174,6 +175,11 @@ def delete_supplier(supplier_id: int, db: Session = Depends(get_db)):
     supplier = db.get(Supplier, supplier_id)
     if not supplier:
         raise HTTPException(404, "Постачальника не знайдено")
+    
+    # Nullify supplier links in products and order_positions to avoid IntegrityError
+    db.query(Product).filter(Product.supplier_id == supplier_id).update({Product.supplier_id: None})
+    db.query(OrderPosition).filter(OrderPosition.supplier_id == supplier_id).update({OrderPosition.supplier_id: None})
+    
     db.delete(supplier)
     db.commit()
     return None

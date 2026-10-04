@@ -6,6 +6,7 @@ export interface ProductListItem {
   manufacturer_name: string | null;
   stock: number;
   price: string;
+  analogs: string | null;
 }
 
 export interface ProductGroup {
@@ -28,6 +29,7 @@ export interface Product {
   price: string | number;
   supplier_id: number | null;
   location: string | null;
+  analogs: string | null;
   info: string | null;
   group_name: string | null;
   manufacturer_name: string | null;
@@ -43,5 +45,6 @@ export interface ProductCreate {
   price: string | number;
   supplier_id: number | null;
   location: string | null;
+  analogs: string | null;
   info: string | null;
 }

@@ -53,6 +53,7 @@ class Product(Base):
         ForeignKey("manufacturers.id"), default=None
     )
     code: Mapped[str] = mapped_column(String(100), index=True, comment="Артикул")
+    analogs: Mapped[Optional[str]] = mapped_column(Text, default=None, comment="Коди аналогів")
     name: Mapped[str] = mapped_column(String(500))
     stock: Mapped[int] = mapped_column(Integer, default=0, comment="Кількість на складі")
     price: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=Decimal("0.00"))

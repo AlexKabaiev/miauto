@@ -20,6 +20,7 @@ class ManufacturerRead(BaseModel):
 
 class ProductBase(BaseModel):
     code: str
+    analogs: Optional[str] = None
     name: str
     group_id: Optional[int] = None
     manufacturer_id: Optional[int] = None
@@ -36,6 +37,7 @@ class ProductCreate(ProductBase):
 
 class ProductUpdate(BaseModel):
     code: Optional[str] = None
+    analogs: Optional[str] = None
     name: Optional[str] = None
     group_id: Optional[int] = None
     manufacturer_id: Optional[int] = None
@@ -58,6 +60,7 @@ class ProductListItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     code: str
+    analogs: Optional[str] = None
     name: str
     group_name: Optional[str] = None
     manufacturer_name: Optional[str] = None

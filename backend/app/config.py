@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import sys
 
 from pydantic_settings import BaseSettings
 
@@ -17,13 +18,27 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
 
     # --- Database -----------------------------------------------------------
-    DB_DIR: Path = Path(__file__).resolve().parent.parent / "data"
+    @property
+    def DB_DIR(self) -> Path:
+        if getattr(sys, 'frozen', False):
+            exe_dir = Path(sys.executable).parent
+            return exe_dir / "data"
+        return Path(__file__).resolve().parent.parent / "data"
+
     DB_NAME: str = "miauto.db"
 
     @property
     def database_url(self) -> str:
-        self.DB_DIR.mkdir(parents=True, exist_ok=True)
-        return f"sqlite:///{self.DB_DIR / self.DB_NAME}"
+        db_dir = self.DB_DIR
+        db_dir.mkdir(parents=True, exist_ok=True)
+        return f"sqlite:///{db_dir / self.DB_NAME}"
+
+    @property
+    def BACKUP_DIR(self) -> Path:
+        if getattr(sys, 'frozen', False):
+            exe_dir = Path(sys.executable).parent
+            return exe_dir / "backups"
+        return Path(__file__).resolve().parent.parent.parent / "backups"
 
     # --- Server --------------------------------------------------------------
     HOST: str = "127.0.0.1"

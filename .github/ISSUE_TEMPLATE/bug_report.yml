@@ -1,0 +1,46 @@
+name: 🐛 Повідомлення про помилку (Bug Report)
+description: Створіть звіт про помилку для покращення MIAUTO
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Дякуємо за допомогу у пошуку помилок у застосунку MIAUTO!
+  - type: textarea
+    id: description
+    attributes:
+      label: Опис проблеми
+      description: Чіткий та стислий опис проблеми, з якою ви зіткнулися.
+      placeholder: Опишіть, що пішло не так...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Кроки для відтворення
+      description: Послідовність дій, що призводить до помилки.
+      value: |
+        1. Відкрити сторінку '...'
+        2. Натиснути кнопку '...'
+        3. Побачити помилку '...'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Очікувана поведінка
+      description: Що мало статися замість виниклої помилки.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Оточення
+      description: Операційна система, версія браузера, режим (Dev або Standalone EXE).
+      value: |
+        - ОС: Windows 10/11
+        - Режим: Standalone EXE / Локальна розробка
+        - Браузер: Chrome / Edge
+    validations:
+      required: false

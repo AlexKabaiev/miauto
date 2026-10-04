@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { suppliersApi } from '../../api';
+import { useResizableModal } from '../../hooks/useResizableModal';
 
 interface SupplierFormProps {
   supplierId: number | null;
@@ -11,6 +12,7 @@ interface SupplierFormProps {
 export default function SupplierForm({ supplierId, onClose, onSaved }: SupplierFormProps) {
   const { t } = useTranslation();
   const isEdit = supplierId !== null;
+  const panelRef = useResizableModal('miauto_supplier_modal_width', 600);
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
@@ -82,7 +84,7 @@ export default function SupplierForm({ supplierId, onClose, onSaved }: SupplierF
   return (
     <>
       <div className="modal-overlay" onClick={onClose} />
-      <div className="modal-panel">
+      <div className="modal-panel" ref={panelRef}>
         <div className="modal-panel__header">
           <span className="modal-panel__title">
             {isEdit ? `${t('edit_supplier')} #${supplierId}` : t('new_supplier')}

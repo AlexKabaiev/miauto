@@ -1,0 +1,35 @@
+export const CAR_BRANDS = [
+  "Acura", "Alfa Romeo", "Audi", "BMW", "BYD", "Chery", "Chevrolet", "Chrysler", "Citroen", 
+  "Dacia", "Daewoo", "Dodge", "Fiat", "Ford", "Geely", "Haval", "Honda", "Hyundai", 
+  "Infiniti", "Jaguar", "Jeep", "KIA", "Land Rover", "Lexus", "Mazda", "Mercedes-Benz", 
+  "Mini", "Mitsubishi", "Nissan", "Opel", "Peugeot", "Porsche", "Renault", "Seat", 
+  "Skoda", "Smart", "Subaru", "Suzuki", "Tesla", "Toyota", "Volkswagen", "Volvo"
+];
+
+export const CAR_MODELS: Record<string, string[]> = {
+  "Toyota": ["Camry", "Corolla", "RAV4", "Land Cruiser Prado", "Land Cruiser 300", "Highlander", "Yaris", "C-HR", "Hilux", "Avensis", "Prius"],
+  "Volkswagen": ["Golf", "Passat", "Tiguan", "Touareg", "Polo", "Jetta", "Transporter", "Caddy", "Arteon", "ID.4"],
+  "Skoda": ["Octavia", "Superb", "Kodiaq", "Karoq", "Fabia", "Rapid", "Kamiq"],
+  "Renault": ["Duster", "Megane", "Logan", "Sandero", "Clio", "Kaptur", "Kadjar", "Koleos", "Kangoo"],
+  "KIA": ["Sportage", "Rio", "Optima", "Sorento", "Ceed", "Cerato", "Soul"],
+  "Hyundai": ["Tucson", "Santa Fe", "Elantra", "Sonata", "Accent", "i30", "Kona"],
+  "Nissan": ["Qashqai", "X-Trail", "Rogue", "Leaf", "Juke", "Murano", "Navara"],
+  "BMW": ["X5", "3 Series", "5 Series", "X3", "X6", "X7", "7 Series", "1 Series"],
+  "Mercedes-Benz": ["E-Class", "C-Class", "GLE", "GLC", "S-Class", "V-Class", "GLS", "A-Class"],
+  "Audi": ["A6", "A4", "Q7", "Q5", "A3", "Q8", "A8"],
+  "Mazda": ["CX-5", "Mazda3", "Mazda6", "CX-9", "CX-30", "CX-3"],
+  "Ford": ["Focus", "Mustang", "Kuga", "Escape", "Fiesta", "Fusion", "Mondeo", "Transit"],
+  "Mitsubishi": ["Outlander", "Pajero Sport", "Lancer", "ASX", "L200"],
+  "Peugeot": ["3008", "2008", "5008", "308", "208", "Partner"],
+  "Honda": ["CR-V", "Civic", "Accord", "HR-V", "Pilot", "Fit"],
+  "Subaru": ["Forester", "Outback", "XV", "Impreza", "Legacy"],
+  "Lexus": ["RX", "NX", "LX", "ES", "GX"],
+  "Suzuki": ["Vitara", "SX4", "Jimny", "Swift"],
+  "Chevrolet": ["Aveo", "Lacetti", "Cruze", "Captiva", "Camaro", "Tahoe"],
+  "Volvo": ["XC90", "XC60", "XC40", "S90", "V90"],
+  "Porsche": ["Cayenne", "Macan", "Panamera", "911", "Taycan"],
+  "BYD": ["Song Plus", "Tang", "Han", "Yuan", "Dolphin", "Seagull", "Seal"],
+  "Chery": ["Tiggo 2", "Tiggo 4", "Tiggo 7", "Tiggo 8", "Amulet"],
+  "Haval": ["H6", "Jolion", "Dargo", "H9"],
+  "Geely": ["Emgrand", "Atlas", "Coolray", "Tugella"],
+};

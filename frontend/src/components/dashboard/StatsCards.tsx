@@ -3,13 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { dashboardApi } from '../../api';
 import type { DashboardStats } from '../../types';
 
-export default function StatsCards() {
+interface StatsCardsProps {
+  refreshTrigger?: number;
+}
+
+export default function StatsCards({ refreshTrigger }: StatsCardsProps) {
   const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats | null>(null);
 
   useEffect(() => {
     dashboardApi.getStats().then(setStats).catch(() => {});
-  }, []);
+  }, [refreshTrigger]);
 
   if (!stats) {
     return (
@@ -32,10 +36,10 @@ export default function StatsCards() {
 
   const cards = [
     { label: t('active_orders'), value: fmt(stats.active_orders), cls: '' },
+    { label: t('orders_with_debt'), value: fmt(stats.orders_with_debt), cls: 'stat-card__value--warning' },
     { label: t('total_debt'), value: fmtMoney(stats.total_debt), cls: 'stat-card__value--danger' },
-    { label: t('month_revenue'), value: fmtMoney(stats.month_revenue), cls: 'stat-card__value--success' },
-    { label: t('total_clients'), value: fmt(stats.total_clients), cls: 'stat-card__value--accent' },
     { label: t('month_orders'), value: fmt(stats.month_orders), cls: '' },
+    { label: t('month_profit'), value: fmtMoney(stats.month_profit), cls: 'stat-card__value--success' },
   ];
 
   return (

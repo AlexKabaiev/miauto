@@ -6,9 +6,11 @@ import type { CurrencyRate } from '../../types';
 interface HeaderProps {
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
+  onBackup: () => void;
+  backingUp: boolean;
 }
 
-export default function Header({ theme, onToggleTheme }: HeaderProps) {
+export default function Header({ theme, onToggleTheme, onBackup, backingUp }: HeaderProps) {
   const { t, i18n } = useTranslation();
   const [rates, setRates] = useState<CurrencyRate[]>([]);
   const [now, setNow] = useState(new Date());
@@ -57,6 +59,17 @@ export default function Header({ theme, onToggleTheme }: HeaderProps) {
             </div>
           ))}
         </div>
+
+        {/* Backup button */}
+        <button 
+          className="btn btn--outline btn--sm" 
+          onClick={onBackup}
+          disabled={backingUp}
+          style={{ height: '32px', display: 'flex', alignItems: 'center', gap: '4px' }}
+        >
+          <span>💾</span>
+          {backingUp ? t('saving') : t('backup_btn') || 'Бекап'}
+        </button>
 
         {/* Language toggle */}
         <button className="btn btn--ghost btn--sm" onClick={toggleLang}>

@@ -11,10 +11,13 @@ __pycache__/
 
 # Backend Data
 backend/data/
+build/
 
 # Node / Frontend
 node_modules/
 dist/
+release/
+*.zip
 .vite/
 
 # IDEs

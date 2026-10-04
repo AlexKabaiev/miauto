@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict
 # ---------------------------------------------------------------------------
 class PositionBase(BaseModel):
     code: str
+    analogs: Optional[str] = None
     name: str
     supplier_id: Optional[int] = None
     quantity: int = 1
@@ -30,6 +31,7 @@ class PositionCreate(PositionBase):
 
 class PositionUpdate(BaseModel):
     code: Optional[str] = None
+    analogs: Optional[str] = None
     name: Optional[str] = None
     supplier_id: Optional[int] = None
     quantity: Optional[int] = None
@@ -65,6 +67,7 @@ class OrderBase(BaseModel):
 
 
 class OrderCreate(OrderBase):
+    paid: Optional[Decimal] = None
     positions: list[PositionCreate] = []
 
 
@@ -77,7 +80,11 @@ class OrderUpdate(BaseModel):
     discount: Optional[float] = None
     is_active: Optional[bool] = None
     group: Optional[str] = None
+    paid: Optional[Decimal] = None
     info: Optional[str] = None
+    author: Optional[str] = None
+    # Якщо передано — всі позиції замовлення замінюються цим списком
+    positions: Optional[list[PositionCreate]] = None
 
 
 class OrderRead(BaseModel):
@@ -114,6 +121,7 @@ class OrderListItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    client_id: int
     date: datetime
     client_name: str
     client_phone: Optional[str] = None

@@ -10,6 +10,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { clientsApi } from '../../api';
 import ClientForm from './ClientForm';
+import OrderForm from '../orders/OrderForm';
 import type { ClientListItem } from '../../types';
 
 const PAGE_SIZE = 30;
@@ -23,10 +24,15 @@ export default function ClientsPage() {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [clientIdSearch, setClientIdSearch] = useState('');
+  const [clientIdSearchInput, setClientIdSearchInput] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [flagFilter, setFlagFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([{ id: 'fio', desc: false }]);
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const [orderClientId, setOrderClientId] = useState<number | null>(null);
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -36,6 +42,9 @@ export default function ClientsPage() {
         limit: String(PAGE_SIZE),
       };
       if (search) params.search = search;
+      if (clientIdSearch) params.client_id = clientIdSearch;
+      if (statusFilter) params.status_filter = statusFilter;
+      if (flagFilter) params.flag_filter = flagFilter;
       if (sorting.length > 0) {
         params.sort_by = sorting[0].id;
         params.sort_dir = sorting[0].desc ? 'desc' : 'asc';
@@ -48,14 +57,25 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, sorting]);
+  }, [page, search, clientIdSearch, statusFilter, flagFilter, sorting]);
+
+  const handleStatusFilterChange = (val: string) => {
+    setStatusFilter(val);
+    setPage(0);
+  };
+
+  const handleFlagFilterChange = (val: string) => {
+    setFlagFilter(val === flagFilter ? '' : val);
+    setPage(0);
+  };
+
 
   useEffect(() => { fetchClients(); }, [fetchClients]);
 
   useEffect(() => {
-    const timer = setTimeout(() => { setSearch(searchInput); setPage(0); }, 400);
+    const timer = setTimeout(() => { setSearch(searchInput); setClientIdSearch(clientIdSearchInput); setPage(0); }, 400);
     return () => clearTimeout(timer);
-  }, [searchInput]);
+  }, [searchInput, clientIdSearchInput]);
 
   const columns = useMemo(
     () => [
@@ -88,16 +108,46 @@ export default function ClientsPage() {
         meta: { className: 'num' },
         size: 100,
       }),
-      columnHelper.accessor('is_bad', {
+      columnHelper.accessor('status', {
         id: 'status',
         header: () => t('status'),
         cell: info => {
           const c = info.row.original;
-          if (c.is_bad) return <span className="badge badge--danger">⛔</span>;
-          if (c.is_archived) return <span className="badge badge--inactive">{t('archived')}</span>;
-          return <span className="badge badge--active">{t('active_status')}</span>;
+          const status = c.status || 'Активний';
+          const flagsStr = c.flags || '';
+          
+          return (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {status === 'Новий' && <span className="badge badge--status-new">{t('client_status_new')}</span>}
+              {status === 'Активний' && <span className="badge badge--active">{t('client_status_active')}</span>}
+              {status === 'На паузі' && <span className="badge badge--status-processing">{t('client_status_pause')}</span>}
+              {status === 'Проблемний' && <span className="badge badge--danger" title={c.problem_reason ? `${c.problem_reason}: ${c.problem_comment || ''}` : undefined}>⚠️ {t('client_status_problematic')}</span>}
+              {status === 'Архівний' && <span className="badge badge--inactive">{t('client_status_archived')}</span>}
+              
+              {flagsStr && (
+                <div style={{ display: 'inline-flex', gap: '3px', marginLeft: '6px', flexWrap: 'wrap' }}>
+                  {flagsStr.split(',').map(f => f.trim()).filter(Boolean).map(flag => {
+                    if (flag === 'VIP') {
+                      return <span key={flag} className="badge badge--active" style={{ fontSize: '9px', padding: '1px 4px', textTransform: 'none' }} title="VIP">★ VIP</span>;
+                    }
+                    if (flag === 'Є борг') {
+                      return <span key={flag} className="badge badge--danger" style={{ fontSize: '9px', padding: '1px 4px', textTransform: 'none' }} title={t('flag_debt')}>⚠️ {t('flag_debt')}</span>;
+                    }
+                    if (flag === 'Потребує передоплату') {
+                      return <span key={flag} className="badge badge--status-new" style={{ fontSize: '9px', padding: '1px 4px', textTransform: 'none' }} title={t('flag_prepayment')}>⇅ {t('flag_prepayment')}</span>;
+                    }
+                    if (flag === 'Ризиковий') {
+                      return <span key={flag} className="badge badge--danger" style={{ fontSize: '9px', padding: '1px 4px', textTransform: 'none' }} title={t('flag_risky')}>⚡ {t('flag_risky')}</span>;
+                    }
+
+                    return null;
+                  })}
+                </div>
+              )}
+            </div>
+          );
         },
-        size: 120,
+        size: 200,
       }),
     ],
     [t],
@@ -121,15 +171,60 @@ export default function ClientsPage() {
         <div className="table-toolbar__left">
           <input
             className="search-input"
-            placeholder={t('search') || 'Пошук...'}
+            style={{ width: '130px' }}
+            placeholder={t('search_client_id')}
+            value={clientIdSearchInput}
+            onChange={e => setClientIdSearchInput(e.target.value)}
+          />
+          <input
+            className="search-input"
+            placeholder={t('search')}
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
           />
+          
+          <select 
+            className="form-input search-input" 
+            style={{ width: '160px', height: '38px', padding: '0 12px', borderRadius: 'var(--radius-md)' }}
+            value={statusFilter}
+            onChange={e => handleStatusFilterChange(e.target.value)}
+          >
+            <option value="">{t('all')} ({t('status').toLowerCase()})</option>
+            <option value="Новий">{t('client_status_new')}</option>
+            <option value="Активний">{t('client_status_active')}</option>
+            <option value="На паузі">{t('client_status_pause')}</option>
+            <option value="Проблемний">{t('client_status_problematic')}</option>
+            <option value="Архівний">{t('client_status_archived')}</option>
+          </select>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
           <span className="text-muted">{total.toLocaleString()} {t('clients').toLowerCase()}</span>
           <button className="btn btn--primary" onClick={() => { setEditId(null); setFormOpen(true); }}>+ {t('new_client')}</button>
         </div>
+      </div>
+
+      <div className="filter-chips" style={{ marginBottom: 'var(--space-4)', alignItems: 'center' }}>
+        <span className="text-muted" style={{ fontSize: 'var(--font-size-xs)', fontWeight: 600, textTransform: 'uppercase', marginRight: 'var(--space-2)' }}>
+          {t('client_flags')}:
+        </span>
+        <button 
+          className={`filter-chip ${flagFilter === 'VIP' ? 'filter-chip--active' : ''}`}
+          onClick={() => handleFlagFilterChange('VIP')}
+        >
+          ★ VIP
+        </button>
+        <button 
+          className={`filter-chip ${flagFilter === 'Є борг' ? 'filter-chip--active' : ''}`}
+          onClick={() => handleFlagFilterChange('Є борг')}
+        >
+          ⚠️ {t('flag_debt')}
+        </button>
+        <button 
+          className={`filter-chip ${flagFilter === 'Потребує передоплату' ? 'filter-chip--active' : ''}`}
+          onClick={() => handleFlagFilterChange('Потребує передоплату')}
+        >
+          ⇅ {t('flag_prepayment')}
+        </button>
       </div>
 
       <div className="data-table-wrapper">
@@ -200,6 +295,19 @@ export default function ClientsPage() {
         <ClientForm
           clientId={editId}
           onClose={() => setFormOpen(false)}
+          onSaved={() => fetchClients()}
+          onCreateOrder={(id) => {
+            setFormOpen(false);
+            setOrderClientId(id);
+          }}
+        />
+      )}
+
+      {orderClientId && (
+        <OrderForm
+          orderId={null}
+          initialClientId={orderClientId}
+          onClose={() => setOrderClientId(null)}
           onSaved={() => fetchClients()}
         />
       )}
